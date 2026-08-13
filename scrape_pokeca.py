@@ -427,8 +427,7 @@ def merge_stores(lottery):
             "lead": st.get("lead", "未確認"),
             "url": "", "home": st.get("home", ""), "info": "",
             "search": st.get("search", ""),
-            "note": ((st.get("note", "") + "／") if st.get("note") else "")
-                    + "今回実施するかどうかと応募期間は未確認です。各店舗の告知を確認してください",
+            "note": st.get("note", ""),
             "state": "要確認",
         })
         added += 1
@@ -505,7 +504,7 @@ def apply_aggregators(lottery):
                 "prep": "未確認",
                 "lead": "未確認",
                 "url": "", "home": "", "info": info.get("source", ""),
-                "note": "応募方法は各店舗の告知を確認してください",
+                "note": "",
                 "state": "" if en_s else "要確認",
             })
             added += 1

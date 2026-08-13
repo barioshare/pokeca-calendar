@@ -373,6 +373,12 @@ function renderSeriesLine(){
     : `掲載中の商品：${all.map(sname).join("／")}`;
 }
 
+/* 「未確認」だけの項目は出さない。情報がないことを何度も書かない */
+const has = v => {
+  const t = String(v || "").trim();
+  return t && t !== "未確認" && t !== "不明";
+};
+
 /* 券面に出す日付。「未定」とは書かず、分かっている数字だけを見せる */
 function stub(r){
   const e = r.end ? new Date(r.end) : null;
@@ -414,9 +420,9 @@ function renderList(){
         <p class="tk-item">${esc(r.item)}</p>
         <p class="tk-where">${esc(r.where)}　<span class="cat">${esc(cname(r.cat))}</span></p>
         <dl class="tk-meta">
-          <div><dt>応募</dt><dd>${esc(r.how)}</dd></div>
-          <div><dt>準備</dt><dd class="${late ? "warn" : ""}">${esc(r.prep)}${late ? "（今からでは間に合いません）" : ""}</dd></div>
-          ${r.note ? `<div><dt>備考</dt><dd>${esc(r.note)}</dd></div>` : ""}
+          ${has(r.how)  ? `<div><dt>応募</dt><dd>${esc(r.how)}</dd></div>` : ""}
+          ${has(r.prep) ? `<div><dt>準備</dt><dd class="${late ? "warn" : ""}">${esc(r.prep)}${late ? "（今からでは間に合いません）" : ""}</dd></div>` : ""}
+          ${has(r.note) ? `<div><dt>備考</dt><dd>${esc(r.note)}</dd></div>` : ""}
         </dl>
         ${a ? `<a class="go ${a.cls}" href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.label)}<span class="arw" aria-hidden="true">↗</span><span class="sr">（新しいタブで開きます）</span></a>`
             : (r.st.key === "done" ? "" : `<p class="nolink">${esc(r.how)}</p>`)}
