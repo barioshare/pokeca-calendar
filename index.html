@@ -67,6 +67,8 @@ h2 em{font-style:normal;font-family:var(--mono);font-weight:400;color:var(--ink-
 .tk-state{font-size:10.5px;font-weight:800;letter-spacing:.04em;display:block}
 .tk-md{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.02em;display:block;margin-top:3px}
 .tk-hm{font-family:var(--mono);font-size:11px;color:var(--ink-2);display:block}
+.tk-hint{display:block;font-size:9.5px;font-weight:800;color:var(--mute);letter-spacing:.06em;margin-top:4px}
+.tk-hintd{display:block;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink-2);line-height:1.3}
 .tk-body{flex:1 1 auto;padding:11px 12px 12px;min-width:0}
 .tk-item{font-size:16px;font-weight:900;margin:0;line-height:1.4;letter-spacing:-.01em}
 .tk-where{font-size:12px;font-weight:700;color:var(--ink-2);margin:2px 0 0}
@@ -103,6 +105,8 @@ summary{font-size:12px;color:var(--ink-2);cursor:pointer;font-weight:700}
 
 footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
 .note{font-size:11.5px;color:var(--ink-2);line-height:1.7;margin:0 0 14px}
+.divider{font-size:11.5px;font-weight:800;color:var(--ink-2);letter-spacing:.02em;
+  margin:18px 0 10px;padding:6px 0 0;border-top:1.5px dashed var(--rule)}
 .empty{border:1.5px dashed var(--rule);border-radius:3px;padding:20px 14px;text-align:center;font-size:13px;color:var(--ink-2)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
@@ -144,7 +148,7 @@ footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
 <footer>
   <p class="note">
     <span id="notice">掲載情報は変更される場合があります。応募前に必ず各店舗の公式発表をご確認ください。</span><br>
-    「未定」は、抽選をやるという情報はあるものの、いつからいつまで応募できるのか、どこから応募するのかがまだ確認できていないお店です。<br>
+    「未定」は、抽選をやるという情報はあるものの、応募期間や応募方法がまだ確認できていないお店です。券面の「目安」は、期間が判明している他店の応募期間を発売日からの日数に換算して算出した推定値で、その店舗の実際の締切ではありません。<br>
     ポケモン・ポケットモンスター・ポケモンカードゲームは任天堂・クリーチャーズ・ゲームフリークの商標です。当サイトは非公式のまとめです。
   </p>
   <a class="btn" href="#" id="cta">締切をLINEで受け取る</a>
@@ -283,15 +287,31 @@ function action(r){
 }
 
 const ORDER = {live:0, soon:1, check:2, done:3};
+
+/* 日付が確定している行を上に固める。
+   目安しかない行は、いま行動できる案件を隠さないよう下にまとめる */
+const dated = r => !!(r.start || r.end);
+
+/* 表示の大きな区分
+   0: 日付が判明していて、まだ終わっていないもの（今すぐ動ける）
+   1: 応募期間が未確認のもの（目安のみ）
+   2: 終了したもの */
+const tier = r => r.st.key === "done" ? 2 : (dated(r) ? 0 : 1);
 let rows = [], filter = "all", series = "all";
 
 function build(){
   const now = new Date();
   rows = DATA.lottery.map(r => ({...r, st:resolve(r, now)}));
   rows.sort((a,b) => {
+    // 1. 日付が判明している未終了 → 期間未確認 → 終了
+    const t = tier(a) - tier(b);
+    if(t) return t;
+    // 2. 終了は新しい順
+    if(a.st.key === "done") return (new Date(b.end||0)) - (new Date(a.end||0));
+    // 3. 受付中 → 受付前
     const o = ORDER[a.st.key] - ORDER[b.st.key];
     if(o) return o;
-    if(a.st.key === "done") return (new Date(b.end||0)) - (new Date(a.end||0));
+    // 4. 締切が近い順
     const ae = a.end ? new Date(a.end) : Infinity, be = b.end ? new Date(b.end) : Infinity;
     return ae - be;
   });
@@ -360,7 +380,18 @@ function renderList(){
     $("#list").innerHTML = `<p class="empty">条件に合う応募先はありません。<br>「すべて」に戻して確認してください。</p>`;
     return;
   }
+  let dividerDone = false;
   $("#list").innerHTML = shown.map(r => {
+    // 確定分と目安分の境目に一度だけ見出しを挟む
+    let divider = "";
+    if(!dividerDone && tier(r) === 1 && shown.some(x => tier(x) === 0)){
+      dividerDone = true;
+      divider = `<p class="divider">ここから下は応募期間が未確認のお店です</p>`;
+    }
+    return divider + card(r);
+  }).join("");
+
+  function card(r){
     const e = r.end ? new Date(r.end) : null;
     const late = r.lead === "長期の履歴が必要" && (r.st.key === "live" || r.st.key === "soon");
     const a = r.st.key === "done" ? null : action(r);
@@ -368,7 +399,8 @@ function renderList(){
       <div class="tk-stub">
         <span class="tk-state">${esc(r.st.label)}</span>
         ${e ? `<span class="tk-md">${md(e)}</span><span class="tk-hm">${hm(e)}</span>`
-            : `<span class="tk-md">—</span><span class="tk-hm">未定</span>`}
+            : (r.hintEnd ? `<span class="tk-hint">目安</span><span class="tk-hintd">${esc(r.hintStart)}<br>〜${esc(r.hintEnd)}</span>`
+                         : `<span class="tk-md">—</span><span class="tk-hm">未定</span>`)}
       </div>
       <div class="tk-body">
         <p class="tk-item">${esc(r.item)}</p>
@@ -382,7 +414,7 @@ function renderList(){
             : (r.st.key === "done" ? "" : `<p class="nolink">${esc(r.how)}</p>`)}
       </div>
     </article>`;
-  }).join("");
+  }
 }
 
 function renderReleases(){

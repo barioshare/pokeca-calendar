@@ -538,6 +538,50 @@ def fill_search_urls(lottery, releases):
     return lottery
 
 
+# ------------------------------------------- 期間が不明な店舗に目安を入れる
+def add_hints(lottery, releases):
+    """日付が取れていない店舗に、他店の実績から算出した目安を入れる。
+
+    考え方
+      期間が判明している店舗の応募期間を「発売日の何日前か」に換算し、
+      その中央値を使って目安の範囲を出す。
+      推測であることが分かるよう start / end には入れない（締切として
+      扱われないようにする）。hintStart / hintEnd に別で持たせる。
+    """
+    dated = [r for r in lottery if r.get("start") and r.get("end")]
+    if len(dated) < 2 or not releases:
+        return lottery
+
+    today = datetime.now(JST)
+    future = sorted([r for r in releases if r.get("date") and
+                     datetime.strptime(r["date"], "%Y-%m-%d").replace(tzinfo=JST) >= today],
+                    key=lambda r: r["date"])
+    target = future[0] if future else sorted(releases, key=lambda r: r.get("date", ""))[-1]
+    rel = datetime.strptime(target["date"], "%Y-%m-%d").replace(tzinfo=JST)
+
+    def med(vals):
+        vals = sorted(vals)
+        n = len(vals)
+        return vals[n // 2] if n % 2 else (vals[n // 2 - 1] + vals[n // 2]) / 2
+
+    s_off = med([(rel - datetime.fromisoformat(r["start"])).days for r in dated])
+    e_off = med([(rel - datetime.fromisoformat(r["end"])).days for r in dated])
+    if s_off <= 0 or e_off < 0 or s_off < e_off:
+        return lottery
+
+    hs = (rel - timedelta(days=s_off)).strftime("%-m/%-d")
+    he = (rel - timedelta(days=e_off)).strftime("%-m/%-d")
+
+    n = 0
+    for r in lottery:
+        if r.get("start") or r.get("end"):
+            continue
+        r["hintStart"], r["hintEnd"] = hs, he
+        n += 1
+    log(f"目安 {hs}〜{he} を{n}件に付与（{len(dated)}件の実績から算出・発売日 {target['date']}）")
+    return lottery
+
+
 def main():
     os.makedirs(WEB_DIR, exist_ok=True)
     st = load_json(STATE, {})
@@ -573,6 +617,8 @@ def main():
 
     if os.environ.get("DETECT_STORES", "1") != "0":
         lottery = apply_aggregators(lottery)
+
+    lottery = add_hints(lottery, releases)
 
     if not releases and not lottery:
         line("【ポケカサイト】更新に失敗しました\n" + "\n".join(problems))
