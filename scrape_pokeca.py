@@ -450,6 +450,68 @@ def save_json(path, obj):
     os.replace(tmp, path)
 
 
+# ------------------------------- まとめサイトから店舗・期間・応募方法を取り込む
+def apply_aggregators(lottery):
+    """robots.txtで許可されているまとめサイトから拾った情報を反映する。
+    ・stores.json にある店舗 … 期間が未設定なら埋める
+    ・stores.json に無い店舗 … 行を追加する
+    公式から期間が取れている行は上書きしない（公式が優先）。"""
+    try:
+        import detect_stores
+        found = detect_stores.scan()
+    except Exception as e:
+        log(f"まとめサイトの取得をスキップ: {e}")
+        return lottery
+
+    if not found:
+        return lottery
+
+    def norm(v):
+        return re.sub(r"[\s　（）()／/、,・]", "", v or "")
+
+    by_where = {}
+    for r in lottery:
+        by_where.setdefault(norm(r["where"]), []).append(r)
+
+    filled = added = 0
+    for name, info in found.items():
+        key = norm(name)
+        rows = by_where.get(key) or [r for k, v in by_where.items()
+                                     for r in v if key and (key in k or k in key)]
+        period = info.get("period")
+        st_s = period[0].strftime("%Y-%m-%dT%H:%M+09:00") if period and period[0] else ""
+        en_s = period[1].strftime("%Y-%m-%dT%H:%M+09:00") if period and period[1] else ""
+
+        if rows:
+            for r in rows:
+                if r["end"]:          # 公式で締切が取れている行は触らない
+                    continue
+                if st_s or en_s:
+                    r["start"], r["end"] = st_s, en_s
+                    r["state"] = "" if en_s else "要確認"
+                    filled += 1
+                if info.get("how") and r.get("how") in ("", "未確認"):
+                    r["how"] = info["how"]
+        else:
+            lottery.append({
+                "series": SERIES,
+                "start": st_s, "end": en_s,
+                "item": "この商品の抽選をやる場合",
+                "where": name,
+                "cat": "",
+                "how": info.get("how") or "未確認",
+                "prep": "未確認",
+                "lead": "未確認",
+                "url": "", "home": "", "info": info.get("source", ""),
+                "note": "応募方法は各店舗の告知を確認してください",
+                "state": "" if en_s else "要確認",
+            })
+            added += 1
+
+    log(f"まとめサイトから 期間を補完{filled}件 / 店舗を追加{added}件")
+    return lottery
+
+
 def main():
     os.makedirs(WEB_DIR, exist_ok=True)
     st = load_json(STATE, {})
@@ -482,13 +544,16 @@ def main():
 
     lottery = merge_stores(lottery)
 
+    if os.environ.get("DETECT_STORES", "1") != "0":
+        lottery = apply_aggregators(lottery)
+
     if not releases and not lottery:
         line("【ポケカサイト】更新に失敗しました\n" + "\n".join(problems))
         sys.exit("両方0件のため中止")
 
     data = {
         "updated": datetime.now(JST).strftime("%Y-%m-%d"),
-        "notice": "掲載情報は公式サイトから自動取得したものです。応募前に必ず公式発表をご確認ください。",
+        "notice": "掲載情報は公式サイトと各まとめサイトから自動取得したものです。誤りが含まれる場合があります。応募前に必ず各店舗の公式発表をご確認ください。",
         "lineUrl": os.environ.get("LINE_ADD_URL", ""),
         "lottery": lottery,
         "releases": releases,
