@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ポケカ抽選カレンダー｜締切と応募先まとめ</title>
+<meta name="description" content="ポケモンカードの抽選応募の締切・応募先・事前準備を1ページにまとめています。">
+<meta property="og:title" content="ポケカ抽選カレンダー">
+<meta property="og:description" content="締切・応募先・事前準備をまとめて確認。">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --paper:#e9edf1; --card:#fbfcfd; --ink:#12171d; --ink-2:#5a6673;
+  --rule:#c4ccd4; --open:#0b6f52; --urgent:#c22a3a; --soon:#2b4fb8;
+  --mute:#78838f; --stub:#eef1f4;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --jp:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px 64px}
+a{color:inherit}
+:focus-visible{outline:2.5px solid var(--soon);outline-offset:2px}
+
+header{padding:20px 0 6px}
+.brand{font-size:19px;font-weight:900;letter-spacing:-.02em;margin:0}
+.brand span{color:var(--ink-2);font-weight:700}
+.series-line{margin:4px 0 0;font-size:12px;font-weight:700;color:var(--ink-2)}
+.updated{margin:6px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.updated b{color:var(--ink);font-weight:700}
+
+/* ---- hero ---- */
+.hero{margin:16px 0 24px;background:var(--card);border:1.5px solid var(--ink);border-radius:4px;overflow:hidden}
+.hero-top{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;background:var(--ink);color:var(--card)}
+.hero-top .lbl{font-size:11.5px;font-weight:700;letter-spacing:.16em}
+.hero-top .cat{font-family:var(--mono);font-size:11px;opacity:.75}
+.hero-body{padding:16px 14px 6px}
+.hero-name{font-size:19px;font-weight:900;margin:0 0 4px;line-height:1.35;letter-spacing:-.01em}
+.hero-where{font-size:13px;color:var(--ink-2);margin:0;font-weight:700}
+.count{display:flex;align-items:flex-end;gap:2px;font-family:var(--mono);font-weight:700;margin:14px 0 2px;color:var(--urgent);font-variant-numeric:tabular-nums}
+.count .n{font-size:40px;line-height:.95;letter-spacing:-.03em}
+.count .u{font-size:13px;font-weight:700;padding:0 6px 4px 1px;color:var(--ink-2)}
+.deadline{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);margin:0}
+.perf{position:relative;height:0;border-top:2px dashed var(--rule);margin:14px 0 0}
+.perf::before,.perf::after{content:"";position:absolute;top:-9px;width:16px;height:16px;background:var(--paper);border:1.5px solid var(--ink);border-radius:50%}
+.perf::before{left:-9px}.perf::after{right:-9px}
+.hero-foot{padding:12px 14px 14px}
+
+/* ---- buttons ---- */
+.btn{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:14px;padding:11px;border-radius:3px;background:var(--ink);color:var(--card)}
+.go{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-weight:800;font-size:13.5px;padding:9px 10px;border-radius:3px;margin-top:10px}
+.go.primary{background:var(--ink);color:var(--card)}
+.go.second{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.go .arw{font-size:11px;opacity:.8}
+.nolink{margin:10px 0 0;font-size:12px;color:var(--ink-2);background:var(--stub);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;line-height:1.5}
+
+h2{font-size:12px;font-weight:800;letter-spacing:.14em;margin:28px 0 10px;padding-bottom:6px;border-bottom:1.5px solid var(--ink)}
+h2 em{font-style:normal;font-family:var(--mono);font-weight:400;color:var(--ink-2);letter-spacing:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{font:inherit;font-size:12.5px;font-weight:700;background:transparent;color:var(--ink-2);border:1.5px solid var(--rule);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
+
+/* ---- ticket ---- */
+.tk{display:flex;background:var(--card);border:1px solid var(--rule);border-radius:3px;margin-bottom:10px;overflow:hidden}
+.tk-stub{flex:0 0 70px;background:var(--stub);border-right:2px dashed var(--rule);padding:10px 6px;text-align:center}
+.tk-state{font-size:10.5px;font-weight:800;letter-spacing:.04em;display:block}
+.tk-md{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-.02em;display:block;margin-top:3px}
+.tk-hm{font-family:var(--mono);font-size:11px;color:var(--ink-2);display:block}
+.tk-body{flex:1 1 auto;padding:11px 12px 12px;min-width:0}
+.tk-item{font-size:16px;font-weight:900;margin:0;line-height:1.4;letter-spacing:-.01em}
+.tk-where{font-size:12px;font-weight:700;color:var(--ink-2);margin:2px 0 0}
+.tk-where .cat{font-weight:400;color:var(--mute);font-family:var(--mono);font-size:10.5px}
+
+
+.tk-meta{margin:9px 0 0;font-size:12px;line-height:1.55}
+.tk-meta dt{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--ink-2);border:1px solid var(--rule);border-radius:2px;padding:0 4px;margin-right:5px;vertical-align:1px}
+.tk-meta dd{display:inline;margin:0}
+.tk-meta div{margin-top:3px}
+.warn{color:var(--urgent);font-weight:700}
+.s-open .tk-state{color:var(--open)}.s-open .tk-stub{box-shadow:inset 3px 0 0 var(--open)}
+.s-urgent .tk-state{color:var(--urgent)}.s-urgent .tk-stub{box-shadow:inset 3px 0 0 var(--urgent)}
+.s-soon .tk-state{color:var(--soon)}.s-soon .tk-stub{box-shadow:inset 3px 0 0 var(--soon)}
+.s-check .tk-state,.s-done .tk-state{color:var(--mute)}
+.s-done{opacity:.62}
+
+/* ---- releases ---- */
+.rel{margin:0;padding:0;list-style:none}
+.rel-date{font-family:var(--mono);font-size:12px;font-weight:700;border-bottom:1px solid var(--rule);padding:0 0 4px;margin:16px 0 8px;display:flex;justify-content:space-between;color:var(--ink-2)}
+.rel li{display:flex;gap:10px;padding:7px 0;align-items:flex-start}
+.rel .nm{flex:1 1 auto;font-size:13.5px;font-weight:800;line-height:1.4}
+.rel .pr{flex:0 0 auto;font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:700;padding-top:2px;text-align:right}
+.rel .pr i{display:block;font-style:normal;font-family:var(--jp);font-size:9.5px;font-weight:800;letter-spacing:.08em;color:var(--mute)}
+.rel .kind{font-size:11px;color:var(--mute);font-weight:600;display:block}
+.rel li.mk{background:var(--stub);border:1px solid var(--rule);border-radius:3px;padding:7px 9px;margin:2px 0 6px;align-items:center;gap:8px}
+.nm2{flex:1 1 auto;font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.nm2 b{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.nm2 .shop{display:block;font-size:10px;color:var(--mute)}
+.mkgo{flex:0 0 auto;font-size:11.5px;font-weight:800;text-decoration:none;border:1.5px solid var(--ink);border-radius:3px;padding:4px 8px;white-space:nowrap}
+.credit{font-size:10.5px;color:var(--mute);margin:12px 0 0}
+details{margin-top:4px}
+summary{font-size:12px;color:var(--ink-2);cursor:pointer;font-weight:700}
+
+footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
+.note{font-size:11.5px;color:var(--ink-2);line-height:1.7;margin:0 0 14px}
+.empty{border:1.5px dashed var(--rule);border-radius:3px;padding:20px 14px;text-align:center;font-size:13px;color:var(--ink-2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1 class="brand">ポケカ抽選カレンダー</h1>
+  <p class="series-line" id="series-line"></p>
+  <p class="updated">最終更新 <b id="updated">—</b>・掲載 <b id="count-all">—</b>件</p>
+</header>
+
+<section class="hero" id="hero" hidden>
+  <div class="hero-top"><span class="lbl">いちばん早い締切</span><span class="cat" id="hero-cat"></span></div>
+  <div class="hero-body">
+    <p class="hero-name" id="hero-name"></p>
+    <p class="hero-where" id="hero-where"></p>
+    <div class="count"><span class="n" id="hero-count">--</span><span class="u" id="hero-unit"></span></div>
+    <p class="deadline" id="hero-deadline"></p>
+    <div class="perf"></div>
+  </div>
+  <div class="hero-foot"><a class="btn" id="hero-link" href="#list">応募ページを開く</a></div>
+</section>
+
+<h2>抽選に応募できるお店 <em id="count-shown"></em></h2>
+<div class="chips" role="group" aria-label="絞り込み">
+  <button class="chip" data-f="all" aria-pressed="true">すべて</button>
+  <button class="chip" data-f="live" aria-pressed="false">受付中</button>
+  <button class="chip" data-f="ready" aria-pressed="false">今から間に合う</button>
+  <button class="chip" data-f="check" aria-pressed="false">くわしくは未定</button>
+</div>
+<div class="chips" id="series-chips" role="group" aria-label="商品で絞り込み" hidden></div>
+<div id="list"></div>
+
+<h2>発売カレンダー</h2>
+<div id="releases"></div>
+
+<footer>
+  <p class="note">
+    <span id="notice">掲載情報は変更される場合があります。応募前に必ず各店舗の公式発表をご確認ください。</span><br>
+    「未定」は、抽選をやるという情報はあるものの、いつからいつまで応募できるのか、どこから応募するのかがまだ確認できていないお店です。<br>
+    ポケモン・ポケットモンスター・ポケモンカードゲームは任天堂・クリーチャーズ・ゲームフリークの商標です。当サイトは非公式のまとめです。
+  </p>
+  <a class="btn" href="#" id="cta">締切をLINEで受け取る</a>
+  <p class="credit">定価は各商品の希望小売価格（税込）です。売却の目安は運営者が実際の取引を確認して手で入力した参考値で、価格を保証するものではありません。</p>
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   データ差し替えポイント
+   本番では DATA を消して: const DATA = await (await fetch('/data.json')).json();
+
+   series: 弾（シリーズ）名。新弾が出たら行を追加して、この値を新しい弾名にする。
+           2つ以上になると自動で「弾で絞り込み」チップが出る。
+           サイト全体は弾を限定しない作りなので、タイトルの変更は不要。
+
+   url  : 応募ページ（受付開始後にしか存在しない）
+   info : 抽選の案内・告知ページ（常設）
+   home : 店舗のトップまたは抽選一覧ページ。応募ページに飛べないときの受け皿。
+          ボタンの優先順は url → home → info。
+          home が空でアプリ・店頭応募の店舗はボタンを出さず、応募手順を枠で表示する。
+   ============================================================ */
+let DATA = {
+  updated: "2026-08-13",
+  lottery: [
+    {series:"30th CELEBRATION",start:"2026-08-10T12:00+09:00",end:"2026-08-14T16:59+09:00",item:"MEGA 拡張パック「30th CELEBRATION」BOX",where:"ポケモンセンターオンライン",cat:"A 公式",how:"マイナンバーカードで認証した人向けと、していない人向けの2つに分かれています",prep:"ポケモン公式プレイヤーズクラブへの登録と、マイナンバーカードでの本人認証",lead:"数日必要",url:"",info:"https://www.support.pokemoncenter-online.com/%E3%83%9D%E3%82%B1%E3%83%A2%E3%83%B3%E3%82%AB%E3%83%BC%E3%83%89%E3%82%B2%E3%83%BC%E3%83%A0%20MEGA%20%E6%8B%A1%E5%BC%B5%E3%83%91%E3%83%83%E3%82%AF%E3%80%8C30th%20CELEBRATION%E3%80%8DBOX%E3%81%AE%E6%8A%BD%E9%81%B8%E8%B2%A9%E5%A3%B2-6a63164f610241ad01c66ccf",home:"https://www.pokemoncenter-online.com/",note:"7,200円（税込）。当選のほとんどが認証をした人に割り当てられます"},
+    {series:"30th CELEBRATION",start:"2026-08-10T12:00+09:00",end:"2026-08-14T16:59+09:00",item:"プレミアムデッキセット エーフィ・ブラッキー",resale:null,where:"ポケモンセンターオンライン",cat:"A 公式",how:"マイナンバーカードで認証した人向けと、していない人向けの2つに分かれています",prep:"ポケモン公式プレイヤーズクラブへの登録と本人認証",lead:"数日必要",url:"",info:"",home:"https://www.pokemoncenter-online.com/",note:"6,200円（税込）"},
+    {series:"30th CELEBRATION",start:"2026-08-10T12:00+09:00",end:"2026-08-14T16:59+09:00",item:"30th CELEBRATION FUTURISTIC BOX",resale:null,where:"ポケモンセンターオンライン",cat:"A 公式",how:"マイナンバーカードで認証した人向けの応募ページに直接飛べます",prep:"ポケモン公式プレイヤーズクラブへの登録と本人認証",lead:"数日必要",url:"https://www.pokemoncenter-online.com/4521329463872.html",info:"",home:"https://www.pokemoncenter-online.com/",note:"27,500円（税込）。認証していない人向けは別のページ"},
+    {series:"30th CELEBRATION",start:"2026-08-07T00:00+09:00",end:"2026-08-17T20:00+09:00",item:"MEGA 拡張パック「30th CELEBRATION」",where:"トイザらス",cat:"E 玩具・ホビー",how:"店頭のQRコードから応募（Web受付なし）",prep:"2026/6/17〜8/17の購入履歴が必須",lead:"長期の履歴が必要",url:"",info:"",home:"",note:"8/17（月）閉店まで。営業時間内に応募"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"MEGA 拡張パック「30th CELEBRATION」BOX ほか",asin:"B0GXCRBL5J",where:"Amazon",cat:"B 大手EC",how:"商品ページから抽選に申し込み",prep:"Amazonのアカウント",lead:"即日OK",url:"https://www.amazon.co.jp/dp/B0GXCRBL5J",info:"",home:"",note:"受付中との情報あり。期間は要確認。デッキセット等は別ページ",state:"受付中"},
+    {series:"30th CELEBRATION",start:"2026-08-28T12:00+09:00",end:"2026-08-31T16:59+09:00",item:"30th CELEBRATION カードセット（9種セット）",resale:null,where:"ポケモンセンターオンライン",cat:"A 公式",how:"受付開始後に応募ページが公開されます",prep:"ポケモン公式プレイヤーズクラブへの登録と本人認証",lead:"数日必要",url:"",info:"",home:"https://www.pokemoncenter-online.com/",note:"10,800円（税込）。9種まとめて"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"ヤマダ電機",cat:"C 家電量販",how:"ヤマダデンキアプリ ＞ 店頭セール ＞ 下にスクロールして応募バナー",prep:"アプリを入れて会員登録",lead:"数日必要",url:"",info:"",home:"",note:"アプリ内でのみ応募できます",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"ヨドバシカメラ",cat:"C 家電量販",how:"抽選販売ページから応募",prep:"会員登録",lead:"数日必要",url:"",info:"",home:"https://limited.yodobashi.com/",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"エディオン（＆トレカキャピタル）",cat:"C 家電量販",how:"未確認",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"抽選実施の情報あり",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"ビックカメラ",cat:"C 家電量販",how:"店頭抽選",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"コジマ",cat:"C 家電量販",how:"アプリから応募",prep:"アプリを入れる",lead:"数日必要",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"ゲオ",cat:"E 玩具・ホビー",how:"GEOアプリ ＞ 右上のお知らせ から応募",prep:"アプリを入れる",lead:"数日必要",url:"",info:"",home:"",note:"アプリ必須",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"楽天ブックス",cat:"B 大手EC",how:"未確認",prep:"楽天会員",lead:"即日OK",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"イトーヨーカドー",cat:"D 量販・コンビニ",how:"店舗・オンラインで抽選",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"HMV",cat:"D 量販・コンビニ",how:"未確認",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"ドン・キホーテ",cat:"D 量販・コンビニ",how:"未確認",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"抽選実施の情報を確認できず",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"イオン北海道／iAEON（九州）／イオンスタイルオンライン",cat:"G 地域限定",how:"iAEONはアプリ ＞ お得バナー から応募",prep:"アプリを入れて会員登録",lead:"数日必要",url:"",info:"",home:"",note:"地域ごとに実施形態が違う",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"",end:"",item:"30th CELEBRATION 関連商品",where:"その他（三洋堂書店／ふるいち／キデイランド／イエローサブマリン／ホビーゾーン／お宝創庫／平和堂／シーガル ほか）",cat:"F・G",how:"店頭QR・モバイル会員・アプリなど店舗ごとに異なる",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"",state:"詳細未定"},
+    {series:"30th CELEBRATION",start:"2026-08-04T12:00+09:00",end:"2026-08-06T23:59+09:00",item:"MEGA 拡張パック「30th CELEBRATION」",where:"ホビーステーション",cat:"F カードショップ",how:"LivePocketから応募",prep:"LivePocketのアカウント",lead:"数日必要",url:"https://livepocket.jp/e/m3_6v",info:"",home:"",note:""},
+    {series:"30th CELEBRATION",start:"2026-06-30T00:00+09:00",end:"2026-07-15T23:59+09:00",item:"30th CELEBRATION／エーフィ・ブラッキーセット",resale:null,where:"セブンネットショッピング",cat:"B 大手EC",how:"アプリ ＞ 探す から応募",prep:"2025/6/1〜2026/6/14に1円以上の注文＆受取履歴",lead:"長期の履歴が必要",url:"",info:"",home:"",note:"履歴条件のため直前参加は不可"},
+    {series:"30th CELEBRATION",start:"2026-07-02T00:00+09:00",end:"2026-07-07T13:59+09:00",item:"30th CELEBRATION 関連商品",where:"あみあみ",cat:"E 玩具・ホビー",how:"サイトから応募",prep:"会員登録",lead:"数日必要",url:"",info:"",home:"https://www.amiami.jp/",note:""},
+    {series:"30th CELEBRATION",start:"",end:"2026-06-21T23:59+09:00",item:"30th CELEBRATION 関連商品",where:"ファミマオンライン",cat:"D 量販・コンビニ",how:"サイトから応募",prep:"未確認",lead:"未確認",url:"",info:"",home:"https://famima-online.family.co.jp/",note:"開始日は要確認"},
+    {series:"30th CELEBRATION",start:"2026-06-10T00:00+09:00",end:"",item:"30th CELEBRATION 関連商品",where:"ノジマオンライン",cat:"C 家電量販",how:"Googleフォームから応募",prep:"未確認",lead:"未確認",url:"",info:"",home:"",note:"終了期限が公表されていなかった",state:"終了"}
+  ],
+  releases: [
+    {series:"ストームエメラルダ",date:"2026-07-31",name:"拡張パック「ストームエメラルダ」",kind:"拡張パック",price:null,resale:null,note:"発売済み。定価は未確認"},
+    {series:"30th CELEBRATION",date:"2026-09-16",name:"ポケモンカードゲーム MEGA 拡張パック「30th CELEBRATION」",kind:"拡張パック",price:360,resale:null,note:"1BOX20パック＝7,200円。全世界同時発売"},
+    {series:"30th CELEBRATION",date:"2026-09-16",name:"30th CELEBRATION プレミアムデッキセット エーフィ・ブラッキー",kind:"構築デッキ",price:6200,resale:null,note:""},
+    {series:"30th CELEBRATION",date:"2026-09-16",name:"30th CELEBRATION FUTURISTIC BOX",kind:"特別セット",price:27500,resale:null,note:"ポケモンセンターオンライン取り扱い"},
+    {series:"30th CELEBRATION",date:"2026-10-16",name:"30th CELEBRATION カードセット（全9種）",kind:"カードセット",price:1200,resale:null,note:"御三家プロモ3枚＋拡張パック＋カードスタンド",sub:["フシギダネ・ヒトカゲ・ゼニガメ","チコリータ・ヒノアラシ・ワニノコ","キモリ・アチャモ・ミズゴロウ","ナエトル・ヒコザル・ポッチャマ","ツタージャ・ポカブ・ミジュマル","ハリマロン・フォッコ・ケロマツ","モクロー・ニャビー・アシマリ","サルノリ・ヒバニー・メッソン","ニャオハ・ホゲータ・クワッス"]}
+  ]
+};
+
+/* ------------------------------------------------------------
+   Amazonアソシエイト設定
+   ASSOC_TAG に自分のトラッキングIDを入れると、amazon.co.jp への
+   リンクに tag= が自動で付きます（空なら素のリンクのまま）。
+   商品画像は img に「PA-APIで取得した画像URL」を入れてください。
+   PA-APIは審査通過＋売上実績が条件です。取得できるまでは
+   自作の代替タイルが表示されます。
+   ------------------------------------------------------------ */
+const ASSOC_TAG = "";
+
+/* 表示用の言い換え。データ側の値はそのまま、画面に出す言葉だけ分かりやすくする */
+const SERIES_NAMES = {
+  "30th CELEBRATION": "30th CELEBRATION（ポケカ30周年記念）",
+  "ストームエメラルダ": "ストームエメラルダ"
+};
+const sname = v => SERIES_NAMES[v] || v;
+
+const CAT_NAMES = {
+  "A 公式・メーカー直販": "公式ショップ",
+  "B 大手EC": "大手通販",
+  "C 家電量販": "家電量販店",
+  "C 家電量販店": "家電量販店",
+  "D 量販・コンビニ": "スーパー・コンビニ",
+  "D 量販・スーパー・コンビニ": "スーパー・コンビニ",
+  "E 玩具・ホビー": "おもちゃ・ホビー店",
+  "E 玩具・ホビー・書店": "おもちゃ・ホビー店",
+  "F カードショップ": "カードショップ",
+  "G 地域限定": "地域限定",
+  "G 地域限定・その他": "地域限定",
+  "F・G": "カードショップ・地域限定"
+};
+const cname = v => CAT_NAMES[v] || v;
+
+const yen = n => "¥" + Number(n).toLocaleString();
+
+function withTag(url){
+  if(!url || !ASSOC_TAG) return url;
+  try{
+    const u = new URL(url);
+    if(!/(^|\.)amazon\.co\.jp$/.test(u.hostname)) return url;
+    u.searchParams.set("tag", ASSOC_TAG);
+    return u.toString();
+  }catch(e){ return url; }
+}
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const md = d => `${d.getMonth()+1}/${d.getDate()}`;
+const hm = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+
+function resolve(r, now){
+  const s = r.start ? new Date(r.start) : null;
+  const e = r.end   ? new Date(r.end)   : null;
+  if(e && now > e)  return {key:"done", label:"終了",   cls:"s-done"};
+  if(s && now < s)  return {key:"soon", label:"受付前", cls:"s-soon"};
+  if(e && now <= e){
+    const h = (e - now)/36e5;
+    return h <= 24 ? {key:"live",label:"締切間近",cls:"s-urgent"} : {key:"live",label:"受付中",cls:"s-open"};
+  }
+  if(r.state === "受付中") return {key:"live", label:"受付中", cls:"s-open"};
+  if(r.state === "終了")   return {key:"done", label:"終了",   cls:"s-done"};
+  return {key:"check", label:"未定", cls:"s-check"};
+}
+
+/* ボタンの文言はリンク先が何かをそのまま言う */
+/* リンク先の優先順
+   1. url  応募ページに直接飛べるならそれ
+   2. home 飛べないなら店舗のトップ（案内ページは応募できないので使わない）
+   3. info トップも分からないときだけ案内ページ */
+function action(r){
+  if(r.url)  return {href:withTag(r.url),  label:"応募ページを開く",         cls:"primary"};
+  if(r.home) return {href:withTag(r.home), label:`${r.where}のサイトを開く`,  cls:"second"};
+  if(r.info) return {href:withTag(r.info), label:"抽選の案内を読む",          cls:"second"};
+  return null;
+}
+
+const ORDER = {live:0, soon:1, check:2, done:3};
+let rows = [], filter = "all", series = "all";
+
+function build(){
+  const now = new Date();
+  rows = DATA.lottery.map(r => ({...r, st:resolve(r, now)}));
+  rows.sort((a,b) => {
+    const o = ORDER[a.st.key] - ORDER[b.st.key];
+    if(o) return o;
+    if(a.st.key === "done") return (new Date(b.end||0)) - (new Date(a.end||0));
+    const ae = a.end ? new Date(a.end) : Infinity, be = b.end ? new Date(b.end) : Infinity;
+    return ae - be;
+  });
+}
+
+function renderHero(){
+  const now = new Date();
+  const next = rows.filter(r => r.st.key === "live" && r.end).sort((a,b)=>new Date(a.end)-new Date(b.end))[0];
+  if(!next){ $("#hero").hidden = true; return; }
+  $("#hero").hidden = false;
+  $("#hero-cat").textContent = sname(next.series);
+  $("#hero-name").textContent = next.item;
+  $("#hero-where").textContent = next.where;
+  const e = new Date(next.end), ms = e - now;
+  const h = Math.floor(ms/36e5), m = Math.floor(ms%36e5/6e4);
+  if(h < 48){ $("#hero-count").textContent = h < 1 ? m : h; $("#hero-unit").textContent = h < 1 ? "分で締切" : "時間で締切"; }
+  else { $("#hero-count").textContent = Math.floor(h/24); $("#hero-unit").textContent = "日で締切"; }
+  $("#hero-deadline").textContent = `締切 ${e.getMonth()+1}月${e.getDate()}日 ${hm(e)}`;
+  const a = action(next), link = $("#hero-link");
+  if(a){
+    link.href = a.href; link.textContent = a.label;
+    link.target = "_blank"; link.rel = "noopener noreferrer";
+  } else {
+    link.href = "#list"; link.textContent = "応募方法を見る";
+    link.removeAttribute("target"); link.removeAttribute("rel");
+  }
+}
+
+function pass(r){
+  if(series !== "all" && r.series !== series) return false;
+  if(filter === "all")   return true;
+  if(filter === "live")  return r.st.key === "live";
+  if(filter === "check") return r.st.key === "check";
+  if(filter === "ready") return (r.st.key === "live" || r.st.key === "soon") && r.lead !== "長期の履歴が必要";
+  return true;
+}
+
+/* 弾が2つ以上あるときだけ弾チップを出す */
+function renderSeriesChips(){
+  const list = [...new Set(rows.map(r => r.series))];
+  const box = $("#series-chips");
+  if(list.length < 2){ box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false;
+  box.innerHTML = [["all","すべての商品"], ...list.map(v => [v, sname(v)])]
+    .map(([v,l]) => `<button class="chip" data-s="${esc(v)}" aria-pressed="${String(v === series)}">${esc(l)}</button>`).join("");
+  box.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+    series = b.dataset.s;
+    box.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    renderList();
+  }));
+}
+
+/* 受付中・受付前の弾をヘッダーに出す */
+function renderSeriesLine(){
+  const act = [...new Set(rows.filter(r => r.st.key === "live" || r.st.key === "soon").map(r => r.series))];
+  const all = [...new Set(rows.map(r => r.series))];
+  $("#series-line").textContent = act.length
+    ? `いま応募できる商品：${act.map(sname).join("／")}`
+    : `掲載中の商品：${all.map(sname).join("／")}`;
+}
+
+function renderList(){
+  const shown = rows.filter(pass);
+  $("#count-shown").textContent = `${shown.length} / ${rows.length}件`;
+  if(!shown.length){
+    $("#list").innerHTML = `<p class="empty">条件に合う応募先はありません。<br>「すべて」に戻して確認してください。</p>`;
+    return;
+  }
+  $("#list").innerHTML = shown.map(r => {
+    const e = r.end ? new Date(r.end) : null;
+    const late = r.lead === "長期の履歴が必要" && (r.st.key === "live" || r.st.key === "soon");
+    const a = r.st.key === "done" ? null : action(r);
+    return `<article class="tk ${r.st.cls}">
+      <div class="tk-stub">
+        <span class="tk-state">${esc(r.st.label)}</span>
+        ${e ? `<span class="tk-md">${md(e)}</span><span class="tk-hm">${hm(e)}</span>`
+            : `<span class="tk-md">—</span><span class="tk-hm">未定</span>`}
+      </div>
+      <div class="tk-body">
+        <p class="tk-item">${esc(r.item)}</p>
+        <p class="tk-where">${esc(r.where)}　<span class="cat">${esc(cname(r.cat))}</span></p>
+        <dl class="tk-meta">
+          <div><dt>応募</dt><dd>${esc(r.how)}</dd></div>
+          <div><dt>準備</dt><dd class="${late ? "warn" : ""}">${esc(r.prep)}${late ? "（今からでは間に合いません）" : ""}</dd></div>
+          ${r.note ? `<div><dt>備考</dt><dd>${esc(r.note)}</dd></div>` : ""}
+        </dl>
+        ${a ? `<a class="go ${a.cls}" href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.label)}<span class="arw" aria-hidden="true">↗</span><span class="sr">（新しいタブで開きます）</span></a>`
+            : (r.st.key === "done" ? "" : `<p class="nolink">${esc(r.how)}</p>`)}
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function renderReleases(){
+  const byDate = {};
+  DATA.releases.forEach(r => (byDate[r.date] = byDate[r.date] || []).push(r));
+  $("#releases").innerHTML = Object.keys(byDate).sort().map(d => {
+    const dt = new Date(d + "T00:00+09:00");
+    const days = Math.ceil((dt - new Date())/864e5);
+    return `<div class="rel-date"><span>${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日 発売</span>
+      <span>${days > 0 ? "あと" + days + "日" : "発売済"}</span></div>
+      <ul class="rel">${byDate[d].map(r => `<li>
+        <span class="nm">${esc(r.name)}<span class="kind">${esc(r.series)}・${esc(r.kind)}${r.note ? "・" + esc(r.note) : ""}</span>
+        ${r.sub ? `<details><summary>収録9種を見る</summary><span class="kind">${r.sub.map(esc).join("／")}</span></details>` : ""}
+        </span>
+        <span class="pr">${r.price ? `<i>定価</i>${yen(r.price)}` : `<i>定価</i>未定`}</span>
+      </li>
+      ${r.resale ? `<li class="mk"><span class="nm2">売却の目安 <b>${yen(r.resale.price)}</b>
+        <span class="shop">${esc(r.resale.note || "")}${r.resale.at ? "・" + esc(r.resale.at) + "時点" : ""}</span></span></li>` : ""}`).join("")}</ul>`;
+  }).join("");
+}
+
+function paint(){ build(); renderHero(); renderSeriesLine(); renderSeriesChips(); renderList(); }
+
+document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderList();
+}));
+
+function renderHeader(){
+  const u = new Date(DATA.updated + "T00:00+09:00");
+  $("#updated").textContent = isNaN(u) ? DATA.updated
+    : `${u.getFullYear()}/${String(u.getMonth()+1).padStart(2,"0")}/${String(u.getDate()).padStart(2,"0")}`;
+  $("#count-all").textContent = DATA.lottery.length;
+  if(DATA.notice) $("#notice").textContent = DATA.notice;
+  if(DATA.lineUrl){ const c = $("#cta"); c.href = DATA.lineUrl; c.target = "_blank"; c.rel = "noopener noreferrer"; }
+}
+
+function renderAll(){ renderHeader(); paint(); renderReleases(); }
+
+/* data.json（VPSがGASから取ってきたもの）で中身を差し替える。
+   取れなければ埋め込みのDATAのまま動く */
+async function loadData(){
+  try{
+    const r = await fetch("data.json", {cache:"no-store"});
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d && Array.isArray(d.lottery) && d.lottery.length){ DATA = d; renderAll(); }
+  }catch(e){ /* 埋め込みデータで表示を維持 */ }
+}
+
+renderAll();
+setInterval(paint, 60000);
+loadData();
+setInterval(loadData, 300000);   // 5分おきに取り直す
+</script>
+</body>
+</html>
