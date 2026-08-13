@@ -274,6 +274,8 @@ function resolve(r, now){
    2. home 飛べないなら店舗のトップ（案内ページは応募できないので使わない）
    3. info トップも分からないときだけ案内ページ */
 function action(r){
+  if(r.url && r.searchLabel)
+    return {href:withTag(r.url), label:`${r.where}で${r.searchLabel}を探す`, cls:"primary"};
   if(r.url)  return {href:withTag(r.url),  label:"応募ページを開く",         cls:"primary"};
   if(r.home) return {href:withTag(r.home), label:`${r.where}のサイトを開く`,  cls:"second"};
   if(r.info) return {href:withTag(r.info), label:"抽選の案内を読む",          cls:"second"};

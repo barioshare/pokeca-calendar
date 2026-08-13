@@ -35,6 +35,7 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
@@ -418,13 +419,14 @@ def merge_stores(lottery):
         lottery.append({
             "series": SERIES,
             "start": "", "end": "",
-            "item": "この商品の抽選をやる場合",
+            "item": "応募期間は未定",
             "where": st["where"],
             "cat": st.get("cat", ""),
             "how": st.get("how", "未確認"),
             "prep": st.get("prep", "未確認"),
             "lead": st.get("lead", "未確認"),
             "url": "", "home": st.get("home", ""), "info": "",
+            "search": st.get("search", ""),
             "note": ((st.get("note", "") + "／") if st.get("note") else "")
                     + "今回実施するかどうかと応募期間は未確認です。各店舗の告知を確認してください",
             "state": "要確認",
@@ -496,7 +498,7 @@ def apply_aggregators(lottery):
             lottery.append({
                 "series": SERIES,
                 "start": st_s, "end": en_s,
-                "item": "この商品の抽選をやる場合",
+                "item": "応募期間は未定",
                 "where": name,
                 "cat": "",
                 "how": info.get("how") or "未確認",
@@ -509,6 +511,30 @@ def apply_aggregators(lottery):
             added += 1
 
     log(f"まとめサイトから 期間を補完{filled}件 / 店舗を追加{added}件")
+    return lottery
+
+
+# ------------------------------------------- 検索URLを最新のシリーズ名で組み立てる
+def fill_search_urls(lottery, releases):
+    """stores.json の search（{q} を含むURL）に検索語を入れて url にする。
+    検索語は公式から取れた最新シリーズ名を使うので、弾が変わっても追随する。"""
+    series = ""
+    for r in sorted(releases, key=lambda x: x.get("date", ""), reverse=True):
+        if r.get("series"):
+            series = r["series"]
+            break
+    if not series:
+        series = SERIES
+
+    q = urllib.parse.quote(f"ポケモンカード {series}")
+    n = 0
+    for r in lottery:
+        tpl = r.pop("search", "")
+        if tpl and not r.get("url"):
+            r["url"] = tpl.replace("{q}", q)
+            r["searchLabel"] = series      # ボタンの文言に使う
+            n += 1
+    log(f"検索URLを{n}件に設定（検索語: ポケモンカード {series}）")
     return lottery
 
 
@@ -543,6 +569,7 @@ def main():
         lottery = prev.get("lottery", [])
 
     lottery = merge_stores(lottery)
+    lottery = fill_search_urls(lottery, releases)
 
     if os.environ.get("DETECT_STORES", "1") != "0":
         lottery = apply_aggregators(lottery)
