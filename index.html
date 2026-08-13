@@ -373,6 +373,16 @@ function renderSeriesLine(){
     : `掲載中の商品：${all.map(sname).join("／")}`;
 }
 
+/* 券面に出す日付。「未定」とは書かず、分かっている数字だけを見せる */
+function stub(r){
+  const e = r.end ? new Date(r.end) : null;
+  if(e) return `<span class="tk-md">${md(e)}</span><span class="tk-hm">${hm(e)}</span>`;
+  const s = r.start ? new Date(r.start) : null;
+  if(s) return `<span class="tk-hint">開始</span><span class="tk-md">${md(s)}</span>`;
+  if(r.hintEnd) return `<span class="tk-hint">目安</span><span class="tk-hintd">${esc(r.hintStart)}<br>〜${esc(r.hintEnd)}</span>`;
+  return `<span class="tk-md">—</span>`;
+}
+
 function renderList(){
   const shown = rows.filter(pass);
   $("#count-shown").textContent = `${shown.length} / ${rows.length}件`;
@@ -397,10 +407,8 @@ function renderList(){
     const a = r.st.key === "done" ? null : action(r);
     return `<article class="tk ${r.st.cls}">
       <div class="tk-stub">
-        <span class="tk-state">${esc(r.st.label)}</span>
-        ${e ? `<span class="tk-md">${md(e)}</span><span class="tk-hm">${hm(e)}</span>`
-            : (r.hintEnd ? `<span class="tk-hint">目安</span><span class="tk-hintd">${esc(r.hintStart)}<br>〜${esc(r.hintEnd)}</span>`
-                         : `<span class="tk-md">—</span><span class="tk-hm">未定</span>`)}
+        ${r.st.label === "未定" ? "" : `<span class="tk-state">${esc(r.st.label)}</span>`}
+        ${stub(r)}
       </div>
       <div class="tk-body">
         <p class="tk-item">${esc(r.item)}</p>

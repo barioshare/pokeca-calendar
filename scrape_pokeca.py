@@ -419,7 +419,7 @@ def merge_stores(lottery):
         lottery.append({
             "series": SERIES,
             "start": "", "end": "",
-            "item": "応募期間は未定",
+            "item": f"{SERIES} 関連商品",
             "where": st["where"],
             "cat": st.get("cat", ""),
             "how": st.get("how", "未確認"),
@@ -498,7 +498,7 @@ def apply_aggregators(lottery):
             lottery.append({
                 "series": SERIES,
                 "start": st_s, "end": en_s,
-                "item": "応募期間は未定",
+                "item": f"{SERIES} 関連商品",
                 "where": name,
                 "cat": "",
                 "how": info.get("how") or "未確認",
