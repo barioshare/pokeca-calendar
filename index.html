@@ -62,6 +62,7 @@ header{padding:20px 0 6px}
   margin:8px 0 0;padding:7px;border-radius:3px;cursor:pointer;
   background:transparent;color:var(--ink-2);border:1.5px dashed var(--rule)}
 .done.on{background:var(--open);border-style:solid;border-color:var(--open);color:var(--card)}
+.hero-foot .done{margin-top:8px}
 .tk.is-done{opacity:.55}
 .tk.is-done .tk-item{text-decoration:line-through;text-decoration-thickness:1.5px}
 .nolink{margin:10px 0 0;font-size:12px;color:var(--ink-2);background:var(--stub);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;line-height:1.5}
@@ -143,7 +144,10 @@ footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
     <p class="deadline" id="hero-deadline"></p>
     <div class="perf"></div>
   </div>
-  <div class="hero-foot"><a class="btn" id="hero-link" href="#list">応募ページを開く</a></div>
+  <div class="hero-foot">
+    <a class="btn" id="hero-link" href="#list">応募ページを開く</a>
+    <button class="done" id="hero-done">応募済みにする</button>
+  </div>
 </section>
 
 <h2>抽選に応募できるお店 <em id="count-shown"></em></h2>
@@ -301,6 +305,7 @@ function toggleDone(key){
   if(DONE[key]) delete DONE[key];
   else DONE[key] = Date.now();
   saveDone(DONE);
+  renderHero();
   renderList();
 }
 
@@ -381,6 +386,13 @@ function renderHero(){
   if(h < 48){ $("#hero-count").textContent = h < 1 ? m : h; $("#hero-unit").textContent = h < 1 ? "分で締切" : "時間で締切"; }
   else { $("#hero-count").textContent = Math.floor(h/24); $("#hero-unit").textContent = "日で締切"; }
   $("#hero-deadline").textContent = `締切 ${e.getMonth()+1}月${e.getDate()}日 ${hm(e)}`;
+  const hkey = doneKey(next), hdone = !!DONE[hkey];
+  const hb = $("#hero-done");
+  hb.textContent = hdone ? "✓ 応募済み" : "応募済みにする";
+  hb.classList.toggle("on", hdone);
+  hb.setAttribute("aria-pressed", String(hdone));
+  hb.onclick = () => toggleDone(hkey);   // 一覧側と同じ記録を使う
+
   const a = action(next), link = $("#hero-link");
   if(a){
     link.href = a.href; link.textContent = a.label;
