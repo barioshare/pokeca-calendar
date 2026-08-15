@@ -259,7 +259,8 @@ def main():
             "how": base.get("how", ""),
             "prep": base.get("prep", ""),
             "lead": base.get("lead", "未確認"),
-            "url": "", "home": base.get("home", ""), "info": info.get("source", ""),
+            "url": "", "home": base.get("home", ""), "info": "",
+            "src": info.get("source", ""),      # 出典。ボタンには使わない
             "note": base.get("note", ""),
             "state": "" if en else "要確認",
         })
