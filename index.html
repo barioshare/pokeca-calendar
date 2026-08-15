@@ -58,6 +58,12 @@ header{padding:20px 0 6px}
 .go.primary{background:var(--ink);color:var(--card)}
 .go.second{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
 .go .arw{font-size:11px;opacity:.8}
+.done{display:block;width:100%;font:inherit;font-size:12.5px;font-weight:800;
+  margin:8px 0 0;padding:7px;border-radius:3px;cursor:pointer;
+  background:transparent;color:var(--ink-2);border:1.5px dashed var(--rule)}
+.done.on{background:var(--open);border-style:solid;border-color:var(--open);color:var(--card)}
+.tk.is-done{opacity:.55}
+.tk.is-done .tk-item{text-decoration:line-through;text-decoration-thickness:1.5px}
 .nolink{margin:10px 0 0;font-size:12px;color:var(--ink-2);background:var(--stub);border:1px solid var(--rule);border-radius:3px;padding:8px 10px;line-height:1.5}
 
 h2{font-size:12px;font-weight:800;letter-spacing:.14em;margin:28px 0 10px;padding-bottom:6px;border-bottom:1.5px solid var(--ink)}
@@ -145,6 +151,7 @@ footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
   <button class="chip" data-f="all" aria-pressed="true">すべて</button>
   <button class="chip" data-f="live" aria-pressed="false">受付中</button>
   <button class="chip" data-f="ready" aria-pressed="false">今から間に合う</button>
+  <button class="chip" data-f="todo" aria-pressed="false">未応募のみ</button>
   <button class="chip" data-f="check" aria-pressed="false">くわしくは未定</button>
 </div>
 <div class="chips" id="series-chips" role="group" aria-label="商品で絞り込み" hidden></div>
@@ -260,6 +267,43 @@ function withTag(url){
   }catch(e){ return url; }
 }
 
+/* ------------------------------------------------------------
+   応募済みの記録
+   保存先はこの端末のブラウザだけ。サーバーには送らないので、
+   同じURLを開いた他の人には見えない。
+   締切から2週間過ぎた記録は自動で消す（次の弾に持ち越さないため）
+   ------------------------------------------------------------ */
+const DONE_KEY = "applied-v1";
+
+function loadDone(){
+  try{ return JSON.parse(localStorage.getItem(DONE_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+function saveDone(d){
+  try{ localStorage.setItem(DONE_KEY, JSON.stringify(d)); }catch(e){}
+}
+let DONE = loadDone();
+
+/* 行を識別する鍵。店舗名と締切の組み合わせなら弾が変わっても衝突しない */
+const doneKey = r => `${r.where}|${r.end || r.start || ""}`;
+
+function pruneDone(){
+  const limit = Date.now() - 14 * 864e5;
+  let changed = false;
+  for(const k of Object.keys(DONE)){
+    const t = Number(DONE[k]);
+    if(t && t < limit){ delete DONE[k]; changed = true; }
+  }
+  if(changed) saveDone(DONE);
+}
+
+function toggleDone(key){
+  if(DONE[key]) delete DONE[key];
+  else DONE[key] = Date.now();
+  saveDone(DONE);
+  renderList();
+}
+
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const md = d => `${d.getMonth()+1}/${d.getDate()}`;
@@ -352,6 +396,7 @@ function pass(r){
   if(filter === "all")   return true;
   if(filter === "live")  return r.st.key === "live";
   if(filter === "check") return r.st.key === "check";
+  if(filter === "todo")  return r.st.key !== "done" && !DONE[doneKey(r)];
   if(filter === "ready") return (r.st.key === "live" || r.st.key === "soon") && r.lead !== "長期の履歴が必要";
   return true;
 }
@@ -416,12 +461,14 @@ function renderList(){
     }
     return divider + card(r);
   }).join("");
+  bindDone();
 
   function card(r){
     const e = r.end ? new Date(r.end) : null;
     const late = r.lead === "長期の履歴が必要" && (r.st.key === "live" || r.st.key === "soon");
     const a = r.st.key === "done" ? null : action(r);
-    return `<article class="tk ${r.st.cls}">
+    const key = doneKey(r), done = !!DONE[key];
+    return `<article class="tk ${r.st.cls}${done ? " is-done" : ""}">
       <div class="tk-stub">
         ${r.st.label === "未定" ? "" : `<span class="tk-state">${esc(r.st.label)}</span>`}
         ${stub(r)}
@@ -436,9 +483,16 @@ function renderList(){
         </dl>
         ${a ? `<a class="go ${a.cls}" href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.label)}<span class="arw" aria-hidden="true">↗</span><span class="sr">（新しいタブで開きます）</span></a>`
             : (r.st.key === "done" ? "" : `<p class="nolink">${esc(r.how)}</p>`)}
+        ${r.st.key === "done" ? "" : `<button class="done ${done ? "on" : ""}" data-k="${esc(key)}"
+            aria-pressed="${done}">${done ? "✓ 応募済み" : "応募済みにする"}</button>`}
       </div>
     </article>`;
   }
+}
+
+function bindDone(){
+  $("#list").querySelectorAll(".done").forEach(b =>
+    b.addEventListener("click", () => toggleDone(b.dataset.k)));
 }
 
 function renderReleases(){
@@ -538,6 +592,7 @@ async function loadData(){
   renderAll();
 }
 
+pruneDone();
 renderTabs();
 renderAll();
 setInterval(paint, 60000);
