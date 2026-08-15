@@ -77,6 +77,8 @@ h2 em{font-style:normal;font-family:var(--mono);font-weight:400;color:var(--ink-
 .tk-body{flex:1 1 auto;padding:11px 12px 12px;min-width:0}
 .tk-item{font-size:16px;font-weight:900;margin:0;line-height:1.4;letter-spacing:-.01em}
 .tk-where{font-size:12px;font-weight:700;color:var(--ink-2);margin:2px 0 0}
+.tk-where .game{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.04em;
+  background:var(--ink);color:var(--card);border-radius:2px;padding:1px 5px;margin-right:6px;vertical-align:1px}
 .tk-where .cat{font-weight:400;color:var(--mute);font-family:var(--mono);font-size:10.5px}
 
 
@@ -424,7 +426,7 @@ function renderList(){
       </div>
       <div class="tk-body">
         <p class="tk-item">${esc(r.item)}</p>
-        <p class="tk-where">${esc(r.where)}　<span class="cat">${esc(cname(r.cat))}</span></p>
+        <p class="tk-where">${tab.id === "all" && r.game ? `<span class="game">${esc(r.game)}</span>` : ""}${esc(r.where)}　<span class="cat">${esc(cname(r.cat))}</span></p>
         <dl class="tk-meta">
           ${has(r.how)  ? `<div><dt>応募</dt><dd>${esc(r.how)}</dd></div>` : ""}
           ${has(r.prep) ? `<div><dt>準備</dt><dd class="${late ? "warn" : ""}">${esc(r.prep)}${late ? "（今からでは間に合いません）" : ""}</dd></div>` : ""}
@@ -446,7 +448,7 @@ function renderReleases(){
     return `<div class="rel-date"><span>${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日 発売</span>
       <span>${days > 0 ? "あと" + days + "日" : "発売済"}</span></div>
       <ul class="rel">${byDate[d].map(r => `<li>
-        <span class="nm">${esc(r.name)}<span class="kind">${esc(r.series)}・${esc(r.kind)}${r.note ? "・" + esc(r.note) : ""}</span>
+        <span class="nm">${esc(r.name)}<span class="kind">${tab.id === "all" && r.game ? esc(r.game) + "・" : ""}${esc(r.series)}・${esc(r.kind)}${r.note ? "・" + esc(r.note) : ""}</span>
         ${r.sub ? `<details><summary>収録9種を見る</summary><span class="kind">${r.sub.map(esc).join("／")}</span></details>` : ""}
         </span>
         <span class="pr">${r.price ? `<i>定価</i>${yen(r.price)}` : `<i>定価</i>未定`}</span>
@@ -482,16 +484,18 @@ const GAMES = [
   {id:"pokeca",   label:"ポケカ",     file:"data.json"},
   {id:"onepiece", label:"ワンピース", file:"data_onepiece.json"}
 ];
-let game = GAMES[0];
+/* タブ。all は両方を読み込んで締切順に統合する */
+const TABS = [{id:"all", label:"すべて"}, ...GAMES];
+let tab = TABS[0];
 
 function renderTabs(){
-  $("#tabs").innerHTML = GAMES.map(g =>
-    `<button class="tab" role="tab" data-g="${g.id}" aria-selected="${g.id === game.id}">${esc(g.label)}</button>`
+  $("#tabs").innerHTML = TABS.map(t =>
+    `<button class="tab" role="tab" data-g="${t.id}" aria-selected="${t.id === tab.id}">${esc(t.label)}</button>`
   ).join("");
   $("#tabs").querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
-    const next = GAMES.find(g => g.id === b.dataset.g);
-    if(!next || next.id === game.id) return;
-    game = next;
+    const next = TABS.find(t => t.id === b.dataset.g);
+    if(!next || next.id === tab.id) return;
+    tab = next;
     filter = "all"; series = "all";
     document.querySelectorAll(".chips [data-f]").forEach(x =>
       x.setAttribute("aria-pressed", String(x.dataset.f === "all")));
@@ -500,13 +504,37 @@ function renderTabs(){
   }));
 }
 
-async function loadData(){
+async function fetchGame(g){
   try{
-    const r = await fetch(game.file, {cache:"no-store"});
-    if(!r.ok) return;
+    const r = await fetch(g.file, {cache:"no-store"});
+    if(!r.ok) return null;
     const d = await r.json();
-    if(d && Array.isArray(d.lottery) && d.lottery.length){ DATA = d; renderAll(); }
-  }catch(e){ /* 埋め込みデータで表示を維持 */ }
+    if(!d || !Array.isArray(d.lottery)) return null;
+    // どのトレカの行か分かるように印を付ける
+    d.lottery.forEach(x => x.game = g.label);
+    (d.releases || []).forEach(x => x.game = g.label);
+    return d;
+  }catch(e){ return null; }
+}
+
+async function loadData(){
+  const targets = tab.id === "all" ? GAMES : [GAMES.find(g => g.id === tab.id)];
+  const got = (await Promise.all(targets.map(fetchGame))).filter(Boolean);
+  if(!got.length) return;
+
+  if(got.length === 1){
+    DATA = got[0];
+  }else{
+    // 最終更新は新しい方を採用する
+    DATA = {
+      updated: got.map(d => d.updated).sort().pop(),
+      notice:  got[0].notice,
+      lineUrl: got.find(d => d.lineUrl)?.lineUrl || "",
+      lottery: got.flatMap(d => d.lottery),
+      releases: got.flatMap(d => d.releases || [])
+    };
+  }
+  renderAll();
 }
 
 renderTabs();
