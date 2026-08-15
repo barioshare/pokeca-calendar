@@ -581,6 +581,39 @@ def add_hints(lottery, releases):
     return lottery
 
 
+# ------------------------------------------- 店舗行の商品名を代表商品に置き換える
+def name_stores(lottery, releases):
+    """『30th CELEBRATION 関連商品』では何の抽選か分からないので、
+    公式から取れた商品のうち代表的なものの名前を使う。
+
+    代表の選び方
+      これから発売する商品のうち、発売日がいちばん近く、定価がいちばん安いもの。
+      パックが最安で、抽選の本命になることが多いため。
+    店舗ごとの対象商品まではまとめサイトから取れないので「ほか」を付ける。
+    """
+    today = datetime.now(JST)
+    future = [r for r in releases if r.get("date") and r.get("price") and
+              datetime.strptime(r["date"], "%Y-%m-%d").replace(tzinfo=JST) >= today]
+    pool = future or [r for r in releases if r.get("price")]
+    if not pool:
+        return lottery
+
+    pool.sort(key=lambda r: (r["date"], r["price"]))
+    rep = pool[0]["name"]
+
+    # 同じ発売日に複数あるなら「ほか」を付ける
+    same_day = [r for r in pool if r["date"] == pool[0]["date"]]
+    label = rep + ("　ほか" if len(same_day) > 1 else "")
+
+    n = 0
+    for r in lottery:
+        if r.get("item", "").endswith("関連商品"):
+            r["item"] = label
+            n += 1
+    log(f"店舗行の商品名を「{label}」に設定（{n}件）")
+    return lottery
+
+
 def main():
     os.makedirs(WEB_DIR, exist_ok=True)
     st = load_json(STATE, {})
@@ -617,6 +650,7 @@ def main():
     if os.environ.get("DETECT_STORES", "1") != "0":
         lottery = apply_aggregators(lottery)
 
+    lottery = name_stores(lottery, releases)
     lottery = add_hints(lottery, releases)
 
     if not releases and not lottery:

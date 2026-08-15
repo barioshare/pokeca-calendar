@@ -283,6 +283,22 @@ def main():
         })
     log(f"店舗マスタを反映（全{len(lottery)}件）")
 
+    # 店舗行の商品名を代表商品に置き換える
+    today = datetime.now(JST)
+    pool = [r for r in releases if r.get("price") and r.get("date") and
+            datetime.strptime(r["date"], "%Y-%m-%d").replace(tzinfo=JST) >= today]
+    pool = pool or [r for r in releases if r.get("price")]
+    if pool:
+        pool.sort(key=lambda r: (r["date"], r["price"]))
+        same_day = [r for r in pool if r["date"] == pool[0]["date"]]
+        label = pool[0]["name"] + ("　ほか" if len(same_day) > 1 else "")
+        n = 0
+        for r in lottery:
+            if r.get("item", "").endswith("関連商品"):
+                r["item"] = label
+                n += 1
+        log(f"店舗行の商品名を「{label}」に設定（{n}件）")
+
     if not releases and not lottery:
         sys.exit("両方0件のため中止")
 
