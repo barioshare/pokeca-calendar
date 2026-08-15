@@ -33,13 +33,21 @@ jobs:
           LINE_TO: ${{ secrets.LINE_TO }}
           SITE_URL: ${{ vars.SITE_URL }}
           LINE_ADD_URL: ${{ vars.LINE_ADD_URL }}
+          DETECT_STORES: '1'
         run: python3 scrape_pokeca.py
+
+      - name: ワンピースカードを取得
+        continue-on-error: true      # 片方が失敗してももう片方は更新する
+        env:
+          WEB_DIR: .
+          STORES_OP: ./stores_onepiece.json
+        run: python3 scrape_onepiece.py
 
       - name: 変更があればコミット
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json .state.json
+          git add data.json .state.json data_onepiece.json .state_onepiece.json
           if git diff --staged --quiet; then
             echo "変更なし"
           else

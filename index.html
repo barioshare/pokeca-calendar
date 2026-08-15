@@ -26,6 +26,11 @@ a{color:inherit}
 header{padding:20px 0 6px}
 .brand{font-size:19px;font-weight:900;letter-spacing:-.02em;margin:0}
 .brand span{color:var(--ink-2);font-weight:700}
+.tabs{display:flex;gap:0;margin:10px 0 0;border-bottom:1.5px solid var(--ink)}
+.tab{font:inherit;font-size:14px;font-weight:800;background:transparent;color:var(--ink-2);
+  border:1.5px solid var(--rule);border-bottom:0;border-radius:3px 3px 0 0;
+  padding:8px 16px;margin-right:4px;cursor:pointer;position:relative;top:1.5px}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
 .series-line{margin:4px 0 0;font-size:12px;font-weight:700;color:var(--ink-2)}
 .updated{margin:6px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
 .updated b{color:var(--ink);font-weight:700}
@@ -115,7 +120,8 @@ footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
 <div class="wrap">
 
 <header>
-  <h1 class="brand">ポケカ抽選カレンダー</h1>
+  <h1 class="brand">トレカ抽選カレンダー</h1>
+  <div class="tabs" id="tabs" role="tablist"></div>
   <p class="series-line" id="series-line"></p>
   <p class="updated">最終更新 <b id="updated">—</b>・掲載 <b id="count-all">—</b>件</p>
 </header>
@@ -471,15 +477,39 @@ function renderAll(){ renderHeader(); paint(); renderReleases(); }
 
 /* data.json（VPSがGASから取ってきたもの）で中身を差し替える。
    取れなければ埋め込みのDATAのまま動く */
+/* 取り扱うトレカ。file は GitHub Actions が生成するデータファイル */
+const GAMES = [
+  {id:"pokeca",   label:"ポケカ",     file:"data.json"},
+  {id:"onepiece", label:"ワンピース", file:"data_onepiece.json"}
+];
+let game = GAMES[0];
+
+function renderTabs(){
+  $("#tabs").innerHTML = GAMES.map(g =>
+    `<button class="tab" role="tab" data-g="${g.id}" aria-selected="${g.id === game.id}">${esc(g.label)}</button>`
+  ).join("");
+  $("#tabs").querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+    const next = GAMES.find(g => g.id === b.dataset.g);
+    if(!next || next.id === game.id) return;
+    game = next;
+    filter = "all"; series = "all";
+    document.querySelectorAll(".chips [data-f]").forEach(x =>
+      x.setAttribute("aria-pressed", String(x.dataset.f === "all")));
+    renderTabs();
+    loadData();
+  }));
+}
+
 async function loadData(){
   try{
-    const r = await fetch("data.json", {cache:"no-store"});
+    const r = await fetch(game.file, {cache:"no-store"});
     if(!r.ok) return;
     const d = await r.json();
     if(d && Array.isArray(d.lottery) && d.lottery.length){ DATA = d; renderAll(); }
   }catch(e){ /* 埋め込みデータで表示を維持 */ }
 }
 
+renderTabs();
 renderAll();
 setInterval(paint, 60000);
 loadData();
