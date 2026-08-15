@@ -357,11 +357,14 @@ function pass(r){
   return true;
 }
 
-/* 弾が2つ以上あるときだけ弾チップを出す */
+/* 商品チップは、1つのトレカの中に商品が2つ以上あるときだけ出す。
+   「すべて」タブでは上のタブと役割が重なるので出さない */
 function renderSeriesChips(){
   const list = [...new Set(rows.map(r => r.series))];
   const box = $("#series-chips");
-  if(list.length < 2){ box.hidden = true; box.innerHTML = ""; return; }
+  if(tab.id === "all" || list.length < 2){
+    box.hidden = true; box.innerHTML = ""; series = "all"; return;
+  }
   box.hidden = false;
   box.innerHTML = [["all","すべての商品"], ...list.map(v => [v, sname(v)])]
     .map(([v,l]) => `<button class="chip" data-s="${esc(v)}" aria-pressed="${String(v === series)}">${esc(l)}</button>`).join("");
