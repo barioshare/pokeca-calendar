@@ -159,7 +159,6 @@ footer{margin-top:32px;border-top:1.5px solid var(--ink);padding-top:14px}
     「未定」は、抽選をやるという情報はあるものの、応募期間や応募方法がまだ確認できていないお店です。券面の「目安」は、期間が判明している他店の応募期間を発売日からの日数に換算して算出した推定値で、その店舗の実際の締切ではありません。<br>
     ポケモン・ポケットモンスター・ポケモンカードゲームは任天堂・クリーチャーズ・ゲームフリークの商標です。当サイトは非公式のまとめです。
   </p>
-  <a class="btn" href="#" id="cta">締切をLINEで受け取る</a>
   <p class="credit">定価は各商品の希望小売価格（税込）です。売却の目安は運営者が実際の取引を確認して手で入力した参考値で、価格を保証するものではありません。</p>
 </footer>
 
@@ -475,7 +474,6 @@ function renderHeader(){
     : `${u.getFullYear()}/${String(u.getMonth()+1).padStart(2,"0")}/${String(u.getDate()).padStart(2,"0")}`;
   $("#count-all").textContent = DATA.lottery.length;
   if(DATA.notice) $("#notice").textContent = DATA.notice;
-  if(DATA.lineUrl){ const c = $("#cta"); c.href = DATA.lineUrl; c.target = "_blank"; c.rel = "noopener noreferrer"; }
 }
 
 function renderAll(){ renderHeader(); paint(); renderReleases(); }
